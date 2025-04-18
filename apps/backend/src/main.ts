@@ -10,8 +10,20 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS for the frontend application
-  app.enableCors();
+  // Enable CORS for the frontend application with specific configuration
+  app.enableCors({
+    origin: [
+      'http://localhost:8080',      // Flutter web server
+      'http://localhost:3000',      // Frontend development server
+      'http://127.0.0.1:8080',      // Alternative Flutter web server address
+      'http://localhost',           // Generic local development
+      'http://0.0.0.0:8080',        // Host binding for Flutter web
+      'http://localhost:9000',      // Any other potential frontend port
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // Set up global validation pipes
   app.useGlobalPipes(
@@ -28,7 +40,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   const nodeEnv = process.env.NODE_ENV || 'development';
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0'); // Listen on all network interfaces
   logger.log(
     `Application is running in ${nodeEnv} mode on: http://localhost:${port}`
   );
