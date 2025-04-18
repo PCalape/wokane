@@ -32,6 +32,11 @@ export class UsersService {
     return user;
   }
 
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ username, password }).exec();
+    return user || null;
+  }
+
   async findAll(): Promise<User[]> {
     return this.userModel.find().exec();
   }

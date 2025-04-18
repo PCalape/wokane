@@ -1,28 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    private usersService: UsersService,
     private jwtService: JwtService
   ) {}
 
   async register(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const { username, password } = authCredentialsDto;
-    const newUser = new this.userModel({ username, password });
-    await newUser.save();
+    await this.usersService.createUser({ username, password });
   }
 
   async login(
     authCredentialsDto: AuthCredentialsDto
   ): Promise<{ accessToken: string }> {
     const { username, password } = authCredentialsDto;
-    const user = await this.userModel.findOne({ username, password }).exec();
+    const user = await this.usersService.validateUser(username, password);
     if (!user) {
       throw new Error('Invalid credentials');
     }
