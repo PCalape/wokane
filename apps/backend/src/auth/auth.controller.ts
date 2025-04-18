@@ -17,7 +17,7 @@ class RegisterDto {
 }
 
 class LoginDto {
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
   email!: string;
 
