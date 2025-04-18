@@ -3,7 +3,7 @@ import {
   ConfigModule as NestConfigModule,
   ConfigService,
 } from '@nestjs/config';
-import * as Joi from 'joi';
+import Joi from 'joi';
 
 @Module({
   imports: [

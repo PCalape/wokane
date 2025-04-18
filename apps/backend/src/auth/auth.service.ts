@@ -11,20 +11,20 @@ export class AuthService {
   ) {}
 
   async register(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDto;
-    await this.usersService.createUser({ username, password });
+    const { email, password } = authCredentialsDto;
+    await this.usersService.createUser({ email, password });
   }
 
   async login(
     authCredentialsDto: AuthCredentialsDto
   ): Promise<{ accessToken: string }> {
-    const { username, password } = authCredentialsDto;
-    const user = await this.usersService.validateUser(username, password);
+    const { email, password } = authCredentialsDto;
+    const user = await this.usersService.validateUser(email, password);
     if (!user) {
       throw new Error('Invalid credentials');
     }
     const accessToken = this.jwtService.sign({
-      username: user.username,
+      email: user.email,
       id: user._id,
     });
     return { accessToken };

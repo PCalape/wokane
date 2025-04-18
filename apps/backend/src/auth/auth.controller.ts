@@ -5,10 +5,6 @@ import { IsString, IsNotEmpty } from 'class-validator';
 class RegisterDto {
   @IsString()
   @IsNotEmpty()
-  username!: string;
-
-  @IsString()
-  @IsNotEmpty()
   name!: string;
 
   @IsString()
@@ -21,10 +17,6 @@ class RegisterDto {
 }
 
 class LoginDto {
-  @IsString()
-  @IsNotEmpty()
-  username!: string;
-
   @IsString()
   @IsNotEmpty()
   email!: string;

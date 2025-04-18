@@ -16,24 +16,24 @@ export class UsersService {
   }
 
   async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDto;
-    const newUser = new this.userModel({ username, password });
+    const { email, password } = authCredentialsDto;
+    const newUser = new this.userModel({ email, password });
     await newUser.save();
   }
 
   async validateUserPassword(
     authCredentialsDto: AuthCredentialsDto
   ): Promise<User> {
-    const { username, password } = authCredentialsDto;
-    const user = await this.userModel.findOne({ username, password }).exec();
+    const { email, password } = authCredentialsDto;
+    const user = await this.userModel.findOne({ email, password }).exec();
     if (!user) {
       throw new Error('Invalid credentials');
     }
     return user;
   }
 
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.userModel.findOne({ username, password }).exec();
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ email, password }).exec();
     return user || null;
   }
 
