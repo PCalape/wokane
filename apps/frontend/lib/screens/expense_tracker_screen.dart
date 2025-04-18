@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:expense_tracker/widgets/expense_item.dart';
 import 'package:expense_tracker/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'login_screen.dart';
 
 class ExpenseTrackerScreen extends StatefulWidget {
   const ExpenseTrackerScreen({Key? key}) : super(key: key);
@@ -20,7 +22,33 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
   @override
   void initState() {
     super.initState();
-    _loadExpenses();
+    _checkTokenAndLoadExpenses();
+  }
+
+  Future<void> _checkTokenAndLoadExpenses() async {
+    // First check if we have a valid token
+    try {
+      final token = await storage.read(key: 'token');
+      debugPrint(
+          "ExpenseTracker: Token check - ${token != null ? 'Token exists' : 'No token found'}");
+      if (token == null) {
+        debugPrint("ExpenseTracker: No token found, redirecting to login");
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+        return;
+      }
+
+      // If token exists, continue loading expenses
+      _loadExpenses();
+    } catch (e) {
+      debugPrint("ExpenseTracker: Error checking token: $e");
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Error checking authentication: $e";
+      });
+    }
   }
 
   Future<void> _loadExpenses() async {
@@ -30,27 +58,71 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
     });
 
     try {
-      final response = await ApiService.fetchExpenses();
+      debugPrint("ExpenseTracker: Loading expenses...");
+
+      // Add timeout to prevent indefinite loading
+      final response = await ApiService.fetchExpenses().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException(
+              'Connection timed out. Please check your network or server status.');
+        },
+      );
+
+      debugPrint("ExpenseTracker: Response status ${response.statusCode}");
+      debugPrint("ExpenseTracker: Response body: ${response.body}");
+
       if (response.statusCode == 200) {
         final List<dynamic> expensesJson = json.decode(response.body);
+        debugPrint("ExpenseTracker: Loaded ${expensesJson.length} expenses");
+
         setState(() {
           _expenses = expensesJson
               .map((expense) => expense as Map<String, dynamic>)
               .toList();
         });
+      } else if (response.statusCode == 401) {
+        debugPrint("ExpenseTracker: Unauthorized (401) - token may be invalid");
+        // Token expired or invalid, redirect to login
+        await storage.delete(key: 'token');
+        if (!mounted) return;
+
+        // Show a message briefly before redirecting
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Session expired. Please login again.')),
+        );
+
+        Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        });
       } else {
+        String errorBody = "No additional details";
+        try {
+          errorBody = json.decode(response.body).toString();
+        } catch (_) {}
+
+        debugPrint("ExpenseTracker: Error response: $errorBody");
         setState(() {
-          _errorMessage = 'Failed to load expenses';
+          _errorMessage =
+              'Failed to load expenses: Status ${response.statusCode}\n$errorBody';
         });
       }
     } catch (e) {
+      debugPrint("ExpenseTracker: Error loading expenses: ${e.toString()}");
       setState(() {
-        _errorMessage = 'Connection error. Please try again.';
+        _errorMessage = e is TimeoutException
+            ? 'Connection timed out. Please check if the server is running.'
+            : 'Connection error: ${e.toString()}';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -177,7 +249,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expense Tracker'),
+        title: const Text('Wokane'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -194,9 +266,49 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text('Loading expenses...', style: TextStyle(fontSize: 16)),
+                  Text('If loading persists, check server connection',
+                      style:
+                          TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                ],
+              ),
+            )
           : _errorMessage != null
-              ? Center(child: Text(_errorMessage!))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 48),
+                      SizedBox(height: 16),
+                      Text(
+                        'Error',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: _loadExpenses,
+                        icon: Icon(Icons.refresh),
+                        label: Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                )
               : _expenses.isEmpty
                   ? const Center(
                       child: Text('No expenses found. Add your first expense!'))

@@ -1,55 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'screens/login_screen.dart';
 import 'screens/registration_screen.dart';
 import 'screens/expense_tracker_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(const ExpenseTrackerApp());
 }
 
-class ExpenseTrackerApp extends StatefulWidget {
+class ExpenseTrackerApp extends StatelessWidget {
   const ExpenseTrackerApp({Key? key}) : super(key: key);
-
-  @override
-  State<ExpenseTrackerApp> createState() => _ExpenseTrackerAppState();
-}
-
-class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
-  final storage = const FlutterSecureStorage();
-  bool _isLoading = true;
-  bool _isLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
-  }
-
-  Future<void> _checkLoginStatus() async {
-    final token = await storage.read(key: 'token');
-    setState(() {
-      _isLoggedIn = token != null;
-      _isLoading = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Expense Tracker',
+      title: 'Wokane',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'Roboto',
       ),
-      initialRoute: _isLoading ? '/splash' : (_isLoggedIn ? '/expenses' : '/'),
+      // Set SplashScreen as the initial route
+      home: const SplashScreen(),
       routes: {
-        '/': (context) => const LoginScreen(),
+        '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegistrationScreen(),
         '/expenses': (context) => const ExpenseTrackerScreen(),
-        '/splash': (context) => const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
       },
     );
   }

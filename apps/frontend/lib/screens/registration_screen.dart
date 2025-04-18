@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:expense_tracker/widgets/custom_button.dart';
 import 'package:expense_tracker/widgets/input_field.dart';
 import 'package:expense_tracker/services/api_service.dart';
@@ -28,17 +29,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     });
 
     try {
+      // Add timeout to prevent indefinite loading
       final response = await ApiService.register(
         _nameController.text,
         _emailController.text,
         _passwordController.text,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException(
+              'Connection timed out. Please check your network or server status.');
+        },
       );
 
       if (response.statusCode == 201) {
-        // Registration successful, now login
+        // Registration successful, now login with timeout
         final loginResponse = await ApiService.login(
           _emailController.text,
           _passwordController.text,
+        ).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException(
+                'Login timed out after successful registration. Please try logging in.');
+          },
         );
 
         if (loginResponse.statusCode == 200) {
@@ -70,12 +84,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Connection error. Please try again.';
+        _errorMessage = e is TimeoutException
+            ? e.message ??
+                'Connection timed out. Please check if the server is running.'
+            : 'Connection error: ${e.toString()}';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 {
   "name": "expense-tracker-backend",
   "version": "1.0.0",
-  "description": "Backend for Expense Tracker application using NestJS",
+  "description": "Backend for Wokane application using NestJS",
   "main": "dist/main.js",
   "scripts": {
     "start": "node dist/main.js",

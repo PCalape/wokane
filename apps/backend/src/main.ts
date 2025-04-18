@@ -10,20 +10,29 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS for the frontend application with specific configuration
-  app.enableCors({
-    origin: [
-      'http://localhost:8080',      // Flutter web server
-      'http://localhost:3000',      // Frontend development server
-      'http://127.0.0.1:8080',      // Alternative Flutter web server address
-      'http://localhost',           // Generic local development
-      'http://0.0.0.0:8080',        // Host binding for Flutter web
-      'http://localhost:9000',      // Any other potential frontend port
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  });
+  // Enable CORS for the frontend application with more permissive configuration
+  // For development, we'll allow all origins for easier testing
+  if (process.env.NODE_ENV === 'production') {
+    app.enableCors({
+      origin: [
+        'http://localhost:8080', // Flutter web server
+        'http://localhost:3000', // Frontend development server
+        'http://127.0.0.1:8080', // Alternative Flutter web server address
+        // Add your production domains here
+      ],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    });
+  } else {
+    // For development, allow any origin
+    app.enableCors({
+      origin: true, // Allow any origin in development
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    });
+  }
 
   // Set up global validation pipes
   app.useGlobalPipes(

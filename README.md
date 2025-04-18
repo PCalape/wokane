@@ -1,6 +1,6 @@
-# Expense Tracker App
+# Wokane App
 
-This is an Expense Tracker application built with Flutter as the frontend and NestJS as the backend. The application allows users to register, log in, and manage their expenses efficiently.
+This is an Wokane application built with Flutter as the frontend and NestJS as the backend. The application allows users to register, log in, and manage their expenses efficiently.
 
 ## Project Structure
 
@@ -66,24 +66,28 @@ expense-tracker-app
 ### Setup Instructions
 
 1. Clone the repository:
+
    ```
    git clone <repository-url>
    cd expense-tracker-app
    ```
 
 2. Navigate to the backend directory and install dependencies:
+
    ```
    cd apps/backend
    npm install
    ```
 
 3. Navigate to the frontend directory and install dependencies:
+
    ```
    cd apps/frontend
    flutter pub get
    ```
 
 4. Build and run the application using Docker:
+
    ```
    docker-compose up --build
    ```
