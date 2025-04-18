@@ -1,0 +1,12 @@
+   Woah! You appear to be trying to run flutter as root.
+   We strongly recommend running the flutter tool without superuser privileges.
+  /
+📎
+
+Running Gradle task 'assembleRelease'...                        
+Warning: Observed package id 'build-tools;29.0.3' in inconsistent location '/usr/lib/android-sdk/build-tools/debian' (Expected '/usr/lib/android-sdk/build-tools/29.0.3')
+Warning: Already observed package id 'build-tools;29.0.3' in '/usr/lib/android-sdk/build-tools/29.0.3'. Skipping duplicate at '/usr/lib/android-sdk/build-tools/debian'
+Warning: Observed package id 'cmdline-tools;latest' in inconsistent location '/usr/lib/android-sdk/cmdline-tools/latest-2' (Expected '/usr/lib/android-sdk/cmdline-tools/latest')
+Warning: Observed package id 'build-tools;29.0.3' in inconsistent location '/usr/lib/android-sdk/build-tools/debian' (Expected '/usr/lib/android-sdk/build-tools/29.0.3')
+Warning: Already observed package id 'build-tools;29.0.3' in '/usr/lib/android-sdk/build-tools/29.0.3'. Skipping duplicate at '/usr/lib/android-sdk/build-tools/debian'
+Warning: Observed package id 'cmdline-tools;latest' in inconsistent location '/usr/lib/android-sdk/cmdline-tools/latest-2' (Expected '/usr/lib/android-sdk/cmdline-tools/latest')

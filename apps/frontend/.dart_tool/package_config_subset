@@ -22,10 +22,6 @@ fake_async
 3.3
 file:///root/.pub-cache/hosted/pub.dev/fake_async-1.3.2/
 file:///root/.pub-cache/hosted/pub.dev/fake_async-1.3.2/lib/
-flutter_secure_storage
-2.12
-file:///root/.pub-cache/hosted/pub.dev/flutter_secure_storage-5.1.2/
-file:///root/.pub-cache/hosted/pub.dev/flutter_secure_storage-5.1.2/lib/
 flutter_secure_storage_linux
 2.12
 file:///root/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.2/
@@ -96,8 +92,8 @@ file:///root/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.8/
 file:///root/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.8/lib/
 provider
 2.12
-file:///root/.pub-cache/hosted/pub.dev/provider-5.0.0/
-file:///root/.pub-cache/hosted/pub.dev/provider-5.0.0/lib/
+file:///root/.pub-cache/hosted/pub.dev/provider-6.1.4/
+file:///root/.pub-cache/hosted/pub.dev/provider-6.1.4/lib/
 source_span
 3.1
 file:///root/.pub-cache/hosted/pub.dev/source_span-1.10.1/
@@ -158,4 +154,8 @@ expense_tracker
 2.12
 file:///root/wokane/apps/frontend/
 file:///root/wokane/apps/frontend/lib/
+flutter_secure_storage
+2.12
+file:///root/wokane/apps/frontend/local_plugins/flutter_secure_storage/
+file:///root/wokane/apps/frontend/local_plugins/flutter_secure_storage/lib/
 2
