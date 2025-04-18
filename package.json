@@ -6,9 +6,13 @@
     "apps/frontend"
   ],
   "devDependencies": {
+    "@types/jest": "^27.5.2",
     "@types/mongoose": "^5.11.97",
+    "@types/supertest": "^6.0.3",
     "eslint": "^9.24.0",
-    "prettier": "^3.5.3"
+    "mongodb-memory-server": "^10.1.4",
+    "prettier": "^3.5.3",
+    "supertest": "^7.1.0"
   },
   "scripts": {
     "start": "npm run build --prefix apps/backend && node apps/backend/dist/main.js",
