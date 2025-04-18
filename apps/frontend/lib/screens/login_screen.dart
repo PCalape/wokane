@@ -96,19 +96,26 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint("Login: Response status code: ${response.statusCode}");
       debugPrint("Login: Raw response body: ${response.body}");
 
-      if (response.statusCode == 200) {
-        debugPrint("Login: Success with status 200!");
+      // Accept both 200 and 201 status codes as success
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint("Login: Success with status ${response.statusCode}!");
 
         try {
           // Parse response and store token
           final responseData = json.decode(response.body);
           debugPrint("Login: Parsed JSON data: $responseData");
 
+          // Check for both 'access_token' and 'accessToken' fields to handle API variations
+          String? token;
           if (responseData.containsKey('access_token')) {
-            final token = responseData['access_token'];
-            debugPrint(
-                "Login: Got token: ${token.toString().substring(0, min(10, token.toString().length))}...");
+            token = responseData['access_token'];
+          } else if (responseData.containsKey('accessToken')) {
+            token = responseData['accessToken'];
+          }
 
+          if (token != null) {
+            debugPrint("Login: Got token: ${token.toString().substring(0, min(10, token.toString().length))}...");
+            
             // Store the token
             await storage.write(key: 'token', value: token);
             debugPrint("Login: Token stored successfully");
@@ -117,16 +124,15 @@ class _LoginScreenState extends State<LoginScreen> {
             // Navigate to expense tracker screen with a slight delay
             // This helps ensure the token is properly stored before navigation
             Future.delayed(const Duration(milliseconds: 100), () {
-              debugPrint("Login: Navigating to Wokane screen");
+              debugPrint("Login: Navigating to expense tracker screen");
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const ExpenseTrackerScreen()),
+                MaterialPageRoute(builder: (context) => const ExpenseTrackerScreen()),
               );
             });
           } else {
-            debugPrint("Login: Response missing access_token field");
+            debugPrint("Login: Response missing token field");
             setState(() {
               _errorMessage = 'Invalid response from server: missing token';
             });
