@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -10,23 +11,20 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async register(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { email, password } = authCredentialsDto;
-    await this.usersService.createUser({ email, password });
+  async register(registerDto: CreateUserDto): Promise<void> {
+    await this.usersService.createUser(registerDto);
   }
 
-  async login(
-    authCredentialsDto: AuthCredentialsDto
-  ): Promise<{ accessToken: string }> {
-    const { email, password } = authCredentialsDto;
-    const user = await this.usersService.validateUser(email, password);
-    if (!user) {
-      throw new Error('Invalid credentials');
+  async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+    try {
+      const user = await this.usersService.validateUserPassword(loginUserDto);
+
+      const payload = { email: user.email, id: user._id };
+      const accessToken = this.jwtService.sign(payload);
+
+      return { accessToken };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid credentials');
     }
-    const accessToken = this.jwtService.sign({
-      email: user.email,
-      id: user._id,
-    });
-    return { accessToken };
   }
 }

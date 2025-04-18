@@ -1,40 +1,69 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthCredentialsDto } from '../auth/dto/auth-credentials.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = new this.userModel(createUserDto);
-    return newUser.save();
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).exec();
   }
 
-  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { email, password } = authCredentialsDto;
-    const newUser = new this.userModel({ email, password });
+  async createUser(createUserDto: CreateUserDto): Promise<void> {
+    // Check if email already exists
+    const existingUser = await this.findByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    // Hash the password before saving
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+
+    const newUser = new this.userModel({
+      ...createUserDto,
+      password: hashedPassword,
+    });
     await newUser.save();
   }
 
-  async validateUserPassword(
-    authCredentialsDto: AuthCredentialsDto
-  ): Promise<User> {
+  async validateUserPassword(authCredentialsDto: {
+    email: string;
+    password: string;
+  }): Promise<User> {
     const { email, password } = authCredentialsDto;
-    const user = await this.userModel.findOne({ email, password }).exec();
+    const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
       throw new Error('Invalid credentials');
     }
+
+    // Verify password using bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid credentials');
+    }
+
     return user;
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userModel.findOne({ email, password }).exec();
-    return user || null;
+    const user = await this.userModel.findOne({ email }).exec();
+    if (!user) {
+      return null;
+    }
+
+    // Verify password using bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    return user;
   }
 
   async findAll(): Promise<User[]> {
@@ -46,6 +75,20 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
+    // Check if email is being updated and if it already exists
+    if (updateUserDto.email) {
+      const existingUser = await this.findByEmail(updateUserDto.email);
+      if (existingUser && (existingUser._id as ObjectId).toString() !== id) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    // If password is being updated, hash it first
+    if (updateUserDto.password) {
+      const salt = await bcrypt.genSalt();
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+    }
+
     return this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
