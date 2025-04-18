@@ -16,7 +16,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final storage = const FlutterSecureStorage();
@@ -26,22 +27,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool _connectionTestInProgress = false;
   bool _forceLogin = false;
   bool _obscurePassword = true;
-  
+
   // Animation controllers
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
     _checkConnection();
-    
+
     // Set up animations
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -49,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       parent: _animationController,
       curve: Curves.easeIn,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -133,8 +134,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           }
 
           if (token != null) {
-            debugPrint("Login: Got token: ${token.toString().substring(0, min(10, token.toString().length))}...");
-            
+            debugPrint(
+                "Login: Got token: ${token.toString().substring(0, min(10, token.toString().length))}...");
+
             // Store the token
             await storage.write(key: 'token', value: token);
             debugPrint("Login: Token stored successfully");
@@ -146,7 +148,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const ExpenseTrackerScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const ExpenseTrackerScreen()),
               );
             });
           } else {
@@ -227,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 60),
-                  
+
                   // Logo and welcome header
                   Center(
                     child: Column(
@@ -236,7 +239,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.1),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(
@@ -268,9 +274,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 48),
-                  
+
                   // Welcome text
                   Text(
                     'Welcome back',
@@ -280,9 +286,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       color: Colors.black87,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     'Sign in to continue tracking your expenses',
                     style: TextStyle(
@@ -290,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       color: Colors.grey[600],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
 
                   // Email field with icon
@@ -299,22 +305,26 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[600]),
+                      prefixIcon:
+                          Icon(Icons.email_outlined, color: Colors.grey[600]),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Password field with toggle visibility
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       hintText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
+                      prefixIcon:
+                          Icon(Icons.lock_outline, color: Colors.grey[600]),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: Colors.grey[600],
                         ),
                         onPressed: () {
@@ -325,9 +335,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Forgot password
                   Align(
                     alignment: Alignment.centerRight,
@@ -341,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       child: const Text('Forgot Password?'),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
 
                   // Connection status indicator and error message
@@ -360,7 +370,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             SizedBox(width: 10),
                             Text(
                               "Checking connection...",
-                              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary),
                             ),
                           ],
                         ),
@@ -378,7 +389,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             const Text(
                               "Cannot connect to the server",
                               style: TextStyle(
-                                  color: Colors.red, fontWeight: FontWeight.bold),
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "Server URL: ${_connectionStatus!['baseUrl']}",
@@ -387,7 +399,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             if (_connectionStatus!['error'] != null)
                               Text(
                                 "Error: ${_connectionStatus!['error']}",
-                                style: const TextStyle(color: Colors.red, fontSize: 12),
+                                style: const TextStyle(
+                                    color: Colors.red, fontSize: 12),
                               ),
                             ElevatedButton.icon(
                               onPressed: _checkConnection,
@@ -395,7 +408,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               label: const Text("Try Again"),
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(120, 40),
-                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ],
@@ -418,35 +432,37 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     ),
 
                   const SizedBox(height: 24),
-                  
+
                   // Login button
                   _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: (_connectionStatus != null &&
-                                  _connectionStatus!['isConnected'] == true) ||
-                              _forceLogin
-                          ? _login
-                          : _checkConnection,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: (_connectionStatus != null &&
+                                      _connectionStatus!['isConnected'] ==
+                                          true) ||
+                                  _forceLogin
+                              ? _login
+                              : _checkConnection,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Register account link
                   Center(
                     child: Row(
@@ -463,11 +479,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const RegistrationScreen()),
+                                  builder: (context) =>
+                                      const RegistrationScreen()),
                             );
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.primary,
                           ),
                           child: const Text(
                             "Register",
@@ -479,7 +497,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ],
                     ),
                   ),
-                  
+
                   // Server status display for debug mode
                   if (kDebugMode)
                     Padding(
@@ -499,8 +517,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                               IconButton(
                                 icon: Icon(
-                                  _forceLogin ? Icons.warning_amber : Icons.bug_report,
-                                  color: _forceLogin ? Colors.orange : Colors.grey[600],
+                                  _forceLogin
+                                      ? Icons.warning_amber
+                                      : Icons.bug_report,
+                                  color: _forceLogin
+                                      ? Colors.orange
+                                      : Colors.grey[600],
                                 ),
                                 onPressed: _toggleForceLogin,
                                 tooltip: 'Toggle force login (debug)',
@@ -509,7 +531,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ),
                           Text(
                             "Server: ${ApiService.baseUrl}",
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600]),
                           ),
                           Text(
                               _connectionStatus != null
@@ -518,7 +541,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               style: TextStyle(
                                   fontSize: 12,
                                   color: _connectionStatus != null &&
-                                          _connectionStatus!['isConnected'] == true
+                                          _connectionStatus!['isConnected'] ==
+                                              true
                                       ? Colors.green
                                       : Colors.grey[600])),
                         ],

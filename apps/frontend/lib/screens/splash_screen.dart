@@ -11,7 +11,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   final storage = const FlutterSecureStorage();
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -19,13 +20,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    
+
     // Set up the animation controller
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     // Create a fade in animation
     _fadeAnimation = Tween<double>(
       begin: 0.0,
@@ -34,10 +35,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       parent: _controller,
       curve: Curves.easeIn,
     ));
-    
+
     // Start the animation
     _controller.forward();
-    
+
     // Check authentication after delay
     Timer(const Duration(seconds: 2), () {
       _checkAuthentication();
@@ -47,14 +48,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _checkAuthentication() async {
     // Check if user is already logged in
     final token = await storage.read(key: 'token');
-    
+
     if (!mounted) return;
-    
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => token != null 
-            ? const ExpenseTrackerScreen() 
-            : const LoginScreen(),
+        builder: (context) =>
+            token != null ? const ExpenseTrackerScreen() : const LoginScreen(),
       ),
     );
   }
