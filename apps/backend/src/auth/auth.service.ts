@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ObjectId } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -15,11 +16,18 @@ export class AuthService {
     await this.usersService.createUser(registerDto);
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+  async login(
+    authCredentialsDto: LoginUserDto
+  ): Promise<{ accessToken: string }> {
     try {
-      const user = await this.usersService.validateUserPassword(loginUserDto);
+      const user =
+        await this.usersService.validateUserPassword(authCredentialsDto);
 
-      const payload = { email: user.email, id: user._id };
+      // Make sure we use _id as id in the payload for consistency
+      const payload = {
+        email: user.email,
+        id: (<ObjectId>user._id).toString(),
+      };
       const accessToken = this.jwtService.sign(payload);
 
       return { accessToken };
