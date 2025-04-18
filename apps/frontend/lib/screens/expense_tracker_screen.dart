@@ -1,3 +1,4 @@
+import 'package:expense_tracker/widgets/expense_item.dart';
 import 'package:flutter/material.dart';
 
 class ExpenseTrackerScreen extends StatelessWidget {
@@ -12,8 +13,7 @@ class ExpenseTrackerScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           return const ExpenseItem(
             title: 'Expense Title',
-            amount: '
-$100',
+            amount: '\$100',
             date: '2025-04-17',
           );
         },

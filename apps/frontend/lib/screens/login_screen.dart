@@ -1,3 +1,5 @@
+import 'package:expense_tracker/widgets/custom_button.dart';
+import 'package:expense_tracker/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'registration_screen.dart';
 import 'expense_tracker_screen.dart';
@@ -21,7 +23,8 @@ class LoginScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ExpenseTrackerScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ExpenseTrackerScreen()),
                 );
               },
             ),
@@ -29,7 +32,8 @@ class LoginScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const RegistrationScreen()),
                 );
               },
               child: const Text('Don’t have an account? Register'),
