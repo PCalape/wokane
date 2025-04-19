@@ -102,8 +102,10 @@ export class ExpensesController {
     return this.expensesService.findAll();
   }
 
+  // Updated route path to match the new URL structure
   @Get('uploads/:filename')
   getImage(@Param('filename') filename: string, @Res() res: Response) {
+    console.log(`Fetching image: ${filename}`);
     const filePath = path.join(process.cwd(), 'uploads', filename);
 
     if (!fs.existsSync(filePath)) {

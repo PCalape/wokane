@@ -4,13 +4,21 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as bodyParser from 'body-parser';
+import { Request, Response, NextFunction } from 'express';
 
 // Load environment variables from .env file
 dotenv.config();
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false, // Disable built-in body parser to use custom config
+  });
+
+  // Configure JSON and URL-encoded body parser limits
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
   // Configure static file serving for uploaded files
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
