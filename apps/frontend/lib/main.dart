@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/login_screen.dart';
 import 'screens/registration_screen.dart';
 import 'screens/expense_tracker_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/debug_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Load environment variables before starting the app
+  await dotenv.load(fileName: ".env");
   runApp(const ExpenseTrackerApp());
 }
 
@@ -63,6 +67,7 @@ class ExpenseTrackerApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegistrationScreen(),
         '/expenses': (context) => const ExpenseTrackerScreen(),
+        '/debug': (context) => const DebugScreen(), // Add debug screen route
       },
     );
   }

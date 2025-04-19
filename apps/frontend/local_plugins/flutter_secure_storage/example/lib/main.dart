@@ -108,7 +108,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   child: Text('Delete all'),
                 ),
               ],
-            )
+            ),
           ],
         ),
         body: Column(

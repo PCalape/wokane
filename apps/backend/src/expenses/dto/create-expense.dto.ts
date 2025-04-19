@@ -1,4 +1,5 @@
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsDateString } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 
 export class CreateExpenseDto {
   @IsString()
@@ -7,6 +8,14 @@ export class CreateExpenseDto {
   @IsNumber()
   amount!: number;
 
-  @IsDate()
-  date!: Date;
+  @IsDateString()
+  date!: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  receiptImage?: string;
 }

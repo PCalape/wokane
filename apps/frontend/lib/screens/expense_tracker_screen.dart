@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:expense_tracker/widgets/expense_item.dart';
 import 'package:expense_tracker/services/api_service.dart';
+import 'package:expense_tracker/widgets/image_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_screen.dart';
@@ -134,112 +136,220 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
     );
     final TextEditingController categoryController = TextEditingController();
 
+    // We'll store the image bytes inside the dialog builder
+    Uint8List? _selectedImageBytes;
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add New Expense'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
-                  ),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setDialogState) {
+            print(
+                "EXPENSE_TRACKER: Building expense dialog, has image: ${_selectedImageBytes != null}");
+            return AlertDialog(
+              title: const Text('Add New Expense'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: amountController,
+                      decoration: const InputDecoration(
+                        labelText: 'Amount',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: dateController,
+                      decoration: const InputDecoration(
+                        labelText: 'Date (YYYY-MM-DD)',
+                        border: OutlineInputBorder(),
+                      ),
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          dateController.text =
+                              "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(
+                        labelText: 'Category (Optional)',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text('Receipt Image (Optional)',
+                        style: TextStyle(fontSize: 14, color: Colors.grey)),
+                    const SizedBox(height: 5),
+                    // Use a simple Container with fixed dimensions instead of LayoutBuilder
+                    Container(
+                      height: 150,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ImagePickerWidget(
+                        height: 150,
+                        width: 300, // Fixed width that works well in dialogs
+                        placeholder: 'Tap to add receipt photo',
+                        onImageSelected: (Uint8List imageBytes) {
+                          print(
+                              "EXPENSE_TRACKER: Image selected callback received ${imageBytes.length} bytes");
+
+                          // Use the dialog's setState to update the image
+                          setDialogState(() {
+                            _selectedImageBytes = imageBytes;
+                            print(
+                                "EXPENSE_TRACKER: Updated _selectedImageBytes with ${imageBytes.length} bytes");
+                          });
+                        },
+                      ),
+                    ),
+                    if (_selectedImageBytes != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Receipt image selected (${_selectedImageBytes!.length} bytes)",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            // Display a small preview of the image
+                            Container(
+                              height: 80,
+                              width: 80,
+                              margin: EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.memory(
+                                  _selectedImageBytes!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print(
+                                        "EXPENSE_TRACKER: Error displaying image preview: $error");
+                                    return Center(
+                                        child: Icon(Icons.broken_image,
+                                            color: Colors.red));
+                                  },
+                                ),
+                              ),
+                            ),
+                            Text(
+                              "Tap 'Add' to upload this image with your expense",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: amountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: dateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Date (YYYY-MM-DD)',
-                    border: OutlineInputBorder(),
-                  ),
-                  onTap: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) {
-                      dateController.text =
-                          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                TextButton(
+                  child: const Text('Add'),
+                  onPressed: () async {
+                    if (titleController.text.isEmpty ||
+                        amountController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Title and amount are required')),
+                      );
+                      return;
+                    }
+
+                    try {
+                      final double amount = double.parse(amountController.text);
+
+                      print(
+                          "EXPENSE_TRACKER: Sending expense data with image: ${_selectedImageBytes != null ? '${_selectedImageBytes!.length} bytes' : 'null'}");
+
+                      // Show loading indicator
+                      setDialogState(() {
+                        // Show loading state if needed
+                      });
+
+                      // Create the expense with direct base64 image upload
+                      final response = await ApiService.addExpense(
+                        titleController.text,
+                        amount,
+                        dateController.text,
+                        categoryController.text.isNotEmpty
+                            ? categoryController.text
+                            : null,
+                        _selectedImageBytes, // Pass the image bytes directly
+                      );
+
+                      print(
+                          "EXPENSE_TRACKER: Response from addExpense: ${response.statusCode}");
+                      if (response.statusCode == 201) {
+                        Navigator.of(context).pop();
+                        _loadExpenses();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Expense added successfully')),
+                        );
+                      } else {
+                        String errorMessage = 'Failed to add expense';
+                        try {
+                          final responseData = json.decode(response.body);
+                          errorMessage =
+                              responseData['message'] ?? errorMessage;
+                          print("Error response: $responseData");
+                        } catch (e) {
+                          print("Error parsing response: $e");
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(errorMessage)),
+                        );
+                      }
+                    } catch (e) {
+                      print("EXPENSE_TRACKER: Error adding expense: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
                     }
                   },
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: categoryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Category (Optional)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () async {
-                if (titleController.text.isEmpty ||
-                    amountController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Title and amount are required')),
-                  );
-                  return;
-                }
-
-                try {
-                  final double amount = double.parse(amountController.text);
-                  final response = await ApiService.addExpense(
-                    titleController.text,
-                    amount,
-                    dateController.text,
-                    categoryController.text.isNotEmpty
-                        ? categoryController.text
-                        : null,
-                  );
-
-                  if (response.statusCode == 201) {
-                    Navigator.of(context).pop();
-                    _loadExpenses();
-                  } else {
-                    final responseData = json.decode(response.body);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(responseData['message'] ??
-                              'Failed to add expense')),
-                    );
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invalid amount format')),
-                  );
-                }
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -320,6 +430,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
                           title: expense['title'] ?? 'Untitled',
                           amount: '\$${expense['amount'] ?? 0}',
                           date: expense['date'] ?? 'No date',
+                          receiptImage: expense['receiptImage'],
                         );
                       },
                     ),

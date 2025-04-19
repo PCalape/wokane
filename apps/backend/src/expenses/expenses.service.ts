@@ -11,7 +11,13 @@ export class ExpensesService {
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto): Promise<Expense> {
-    const createdExpense = new this.expenseModel(createExpenseDto);
+    // Convert string date to Date object
+    const expenseData = {
+      ...createExpenseDto,
+      date: new Date(createExpenseDto.date),
+    };
+
+    const createdExpense = new this.expenseModel(expenseData);
     return createdExpense.save();
   }
 

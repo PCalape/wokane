@@ -11,6 +11,12 @@ export class Expense extends Document {
 
   @Prop({ required: true })
   date!: Date;
+
+  @Prop()
+  category?: string;
+
+  @Prop()
+  receiptImage?: string;
 }
 
 export const ExpenseSchema = SchemaFactory.createForClass(Expense);
